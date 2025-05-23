@@ -1,0 +1,3 @@
+from exponential_levenshtein import exponential_levenshtein
+
+print(1)

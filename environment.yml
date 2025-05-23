@@ -1,4 +1,4 @@
-name: Mi
+name: ADS
 channels:
   - xformers
   - pytorch

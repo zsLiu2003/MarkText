@@ -1,0 +1,10 @@
+model_name: "/data2/huggingface-mirror/dataroot/models/meta-llama/Llama-2-7b-chat-hf"
+watermark_name: "Lexical" 
+watermark_path: "/home/lsz/MarkText/watermark/Format_watermark"
+output_path: "/data1/lzs/MarkText"
+prompt_path: "/data1/lzs/MarkText/prompts"
+#trainin setting
+batch_size: 1
+temperature: 1.0
+devices: [1,2]
+misspellings: "/home/lsz/MarkText/static_data/misspellings.json"
