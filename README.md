@@ -1,4 +1,4 @@
-# MarkText: Comprehensive Text Watermarking Framework
+# On Evaluating The Performance of Watermarked Machine-Generated Texts Under Adversarial Attacks
 
 MarkText is a comprehensive framework for text watermarking research, providing implementations of multiple state-of-the-art watermarking algorithms and evaluation tools for language model-generated text.
 
