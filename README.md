@@ -1,166 +1,222 @@
-## On Evaluating The Performance of Watermarked Machine-Generated Texts Under Adversarial Attacks
+# MarkText: Comprehensive Text Watermarking Framework
 
-This is the official implementation of our paper **[On Evaluating The Performance of Watermarked Machine-Generated Texts Under Adversarial Attacks](11)**
+MarkText is a comprehensive framework for text watermarking research, providing implementations of multiple state-of-the-art watermarking algorithms and evaluation tools for language model-generated text.
 
-<img src="C:\Users\20191\AppData\Roaming\Typora\typora-user-images\image-20240630150448703.png" alt="image-20240630150448703" style="zoom: 80%;" />
+## 🚀 Features
 
-## Supported methods
+- **Multiple Watermarking Algorithms**: Supports 14+ different watermarking schemes including KGW, Exponential, Unigram, SIR, SWEET, UPV, and more
+- **Attack Evaluation**: Built-in robustness testing against various text attacks
+- **Quality Assessment**: Comprehensive text quality evaluation metrics
+- **Efficiency Analysis**: Performance benchmarking and efficiency measurement tools
+- **Visualization**: Rich visualization tools for watermark analysis and results presentation
 
-#### A. Pre-text watermark
+## 📁 Project Structure
 
-- [KGW](https://arxiv.org/abs/2301.10226)
-- [Unigram](https://arxiv.org/abs/2306.17439)
-- [Convert](https://eprint.iacr.org/2023/763)
-- [Inverse](https://arxiv.org/abs/2307.15593)
-- [Exponential](https://www.scottaaronson.com/talks/watermark.ppt)
-
-#### B. Post-text watermark
-
-- [WHITEMARK](https://arxiv.org/abs/2310.08920)
-- [UniSpaCh](https://www.researchgate.net/publication/256991692_UniSpaCh_A_text-based_data_hiding_method_using_Unicode_space_characters)
-- [Linguistic ](https://arxiv.org/abs/2305.08883)
-
-### Preparation
-
-```bash
-git clone https://github.com/zsLiu2003/MarkText.git;
-cd MarkText;
-conda env create -f environment.yml;
-conda activate Mi;
+```
+marktext/
+├── core/                   # Core functionality
+│   ├── generate.py        # Text generation with watermarks
+│   ├── detect.py          # Watermark detection
+│   ├── main.py            # Main entry point
+│   ├── quality.py         # Quality evaluation
+│   ├── efficiency.py      # Performance benchmarking
+│   └── utils/             # Utility functions
+├── watermarks/            # Watermarking algorithms
+│   ├── kgw/              # KGW watermarking
+│   ├── exponential/      # Exponential watermarking
+│   ├── unigram/          # Unigram watermarking
+│   ├── sir/              # SIR watermarking
+│   ├── sweet/            # SWEET watermarking
+│   ├── upv/              # UPV watermarking
+│   └── ...               # Additional schemes
+├── attacks/              # Attack implementations
+│   └── attacks/          # Various text attack methods
+├── evaluation/           # Evaluation tools and pipelines
+│   ├── pipelines/        # Evaluation pipelines
+│   └── tools/            # Analysis tools
+├── datasets/             # Test datasets
+│   ├── c4/               # C4 dataset samples
+│   ├── human_eval/       # HumanEval dataset
+│   └── wmt16_de_en/      # WMT16 translation dataset
+├── configs/              # Configuration files
+├── tests/                # Test scripts
+├── scripts/              # Utility scripts
+└── visualize/            # Visualization tools
 ```
 
-### Watermarking
+## 🛠️ Installation
 
-The code of Linguistic  is from [Text_watermark](https://github.com/Kiode/Text_Watermark), the watermark code of KGW, Unigram, Inverse, Exponential are from [MarkLLM](https://github.com/THU-BPM/MarkLLM), and our code of Convert watermark is from [MarkMyWords](https://github.com/wagner-group/MarkMyWords).
+### Prerequisites
 
-- Generate Watermarked text for  [WHITEMARK](https://arxiv.org/abs/2310.08920), [UniSpaCh](https://www.researchgate.net/publication/256991692_UniSpaCh_A_text-based_data_hiding_method_using_Unicode_space_characters), [Linguistic ](https://arxiv.org/abs/2305.08883).
+- Python 3.9+
+- CUDA-capable GPU (recommended)
+- Conda or Mamba package manager
 
-  ```bash
-  python main.py your_config_path #It is the configuretion setting to the watermark.
-  ```
+### Environment Setup
 
-- Generate watermarked text for [KGW](https://arxiv.org/abs/2301.10226), [Unigram](https://arxiv.org/abs/2306.17439), [Convert](https://eprint.iacr.org/2023/763), [Inverse](https://arxiv.org/abs/2307.15593), [Exponential](https://www.scottaaronson.com/talks/watermark.ppt).
+1. **Clone the repository**:
+   ```bash
+   git clone <repository-url>
+   cd MarkText
+   ```
 
-  ```bash
-  #For KGW, Unigram, Inverse and Exponential
-  python generate.py your_config_path
-  
-  #For Convert
-  cd MarkMyWords;
-  bash install.sh;
-  watermark-benchmark-run config.yml #Please set the watermark name to Binary which is the Convert watermark scheme we used.
-  ```
+2. **Create conda environment**:
+   ```bash
+   conda env create -f marktext/environment.yml
+   conda activate ADS
+   ```
 
-- The format of all watermarked text.
+3. **Install additional dependencies**:
+   ```bash
+   pip install transformers torch torchvision torchaudio
+   ```
 
-  ```python
-  @dataclass(frozen=False)
-  class Generation:
-      watermark: Optional[WatermarkConfig] = None #watermark config
-      watermark_name: str = '' #watermark name
-      key: Optional[int] = None #watermark key which is a Pseudo-random number
-      attack: Optional[str] = None #attack_name
-      id: int = 0 #text id
-      prompt: str = '' #the model input
-      response: str = '' #the model output(watermarked/unwatermarked)
-      quality: Optional[float] = None #the quality of the text
-      token_count: int = 0 #the number of tokens that we need to verify the watermark
-      temperature: float = 1.0 #the training temperature
-  ```
+## 🚀 Quick Start
 
-- The format of watermark config.
+### Basic Watermark Generation
 
-  ```python
-  class ConfigSpec:
-      model_name: str = '' #the model name
-      watermark_name: str = '' #watermark name
-      watermark_path: str = '' #watermark path
-      output_path: str = '' #the output path of watermarked text or attacked text
-      prompt_path: str = '' #the input path of prompt dataset
-      #trainin setting 
-      batch_size: int = 8
-      temperature: float = 1.0
-      devices: Optional[List[int]] = None
-      misspellings: str = "MarkMyWords/run/static_data/misspellings.json" #the dataset of mispelling attack 
-  ```
+```python
+from marktext.core.generate import generate_model_base
+from marktext.core.util.classes import ConfigSpec
 
-### Attacking
+# Configure watermarking
+config = ConfigSpec(
+    model_name="meta-llama/Llama-2-7b-chat-hf",
+    watermark_name="KGW"
+)
 
-We have implemented **twelve** attack methods to remove watermark.
-
-#### A. Pre-text attacks
-
-- [Emoji attack](https://x.com/goodside/status/1610682909647671306)
-- [Distill](https://arxiv.org/pdf/2312.04469)
-
-#### B. Post-text attacks
-
-- [Contraction](https://arxiv.org/abs/2211.09110)
-- [Expansion](https://arxiv.org/abs/2211.09110)
-- [Lowercase](https://arxiv.org/abs/2211.09110)
-- [Misspelling](https://arxiv.org/abs/2211.09110)
-- [Typo](https://arxiv.org/abs/2211.09110)
-- [Modify](https://arxiv.org/abs/2312.00273)
-- [Synonym](https://arxiv.org/abs/2312.00273)
-- [Paraphrase](https://arxiv.org/abs/2303.13408)
-- [Translation](https://github.com/argosopentech/argos-translate)
-- [Token attack](https://arxiv.org/abs/2307.15593)
-
-#### C. Attack all watermark texts
-
-- For emoji attack. 
-
-  ```bash
-  python attack_emoji.py your_config_path #Your should set your watermark list
-  ```
-
-- For distill attack.
-
-  ```bash
-  cd watermark_distill;
-  
-  # For Logit-based watermark distillation(e.g. KGW, Unigram)
-  bash scripts/train/train_llama_logit_distill.sh <watermark_type> <output_dir/> <master_port> <llama_path>
-  # For Sampling modification-based watermark distillation(e.g. Inverse, Convert, Exponential)
-  bash scripts/train/generate_sampling_distill_train_data.sh <watermark_type> <llama_path>
-  
-  # For evaluation
-  bash scripts/evaluate/generate_and_evaluate.sh <dataset> <output_file> <llama_path> <perplexity_model> [models]
-  ```
-
-- For the other all attacks.
-
-  ```bash
-  python attack.py your_config_path
-  ```
-
-#### D. Multi-attack
-
-```bash
-python attack_multi.py your_config_path
+# Generate watermarked text
+watermark_list = ["sample text to watermark"]
+result = generate_model_base(config, watermark_list)
 ```
 
-### Detection
+### Watermark Detection
 
-A. Detect watermark of Format, UniSpaCh, Lexical
+```python
+from marktext.core.detect import detect
 
-```bash
-python detect.py your_config_path
+# Detect watermarks in text
+result = detect(config, "path/to/generated/text.json", "no_attack")
+print(f"Watermark detection rate: {result['watermark_percent']}")
 ```
 
-B. Detect watermark of KGW, Unigram, Inverse, Exponential
+### Command Line Usage
 
 ```bash
-# Please add the detect function:
-is_watermark,score_result = myWatermark.detect_watermark(watermarked_text)
-# And execute the following command
-python generate.py your_config_path
+# Generate watermarked text
+python marktext/core/main.py marktext/configs/KGW.json
+
+# Run evaluation pipeline
+python marktext/tests/test_pipeline.py
 ```
 
-### Quality
+## 📊 Supported Watermarking Algorithms
+
+### Pre-text Watermarks
+- **[KGW](https://arxiv.org/abs/2301.10226)**: Kirchenbauer-Geiping-Wen watermarking
+- **[Unigram](https://arxiv.org/abs/2306.17439)**: Unigram frequency manipulation
+- **[Convert](https://eprint.iacr.org/2023/763)**: Conversion-based watermarking
+- **[Inverse](https://arxiv.org/abs/2307.15593)**: Inverse sampling technique
+- **[Exponential](https://www.scottaaronson.com/talks/watermark.ppt)**: Exponential distribution-based
+
+### Post-text Watermarks
+- **[WHITEMARK](https://arxiv.org/abs/2310.08920)**: Format-based watermarking
+- **[UniSpaCh](https://www.researchgate.net/publication/256991692_UniSpaCh_A_text-based_data_hiding_method_using_Unicode_space_characters)**: Unicode space character manipulation
+- **[Linguistic](https://arxiv.org/abs/2305.08883)**: Linguistic feature-based watermarking
+
+### Additional Algorithms
+- **SIR**: Syntax-aware watermarking
+- **SWEET**: Semantic-preserving technique
+- **UPV**: Universal paraphrase-resistant
+- **EXP**: Enhanced exponential watermarking
+- **EWD**: Extended watermark detection
+
+## 🔧 Configuration
+
+### Algorithm Configuration
+
+Each watermarking algorithm can be configured through JSON files in `marktext/configs/`:
+
+```json
+{
+  "model_name": "meta-llama/Llama-2-7b-chat-hf",
+  "watermark_name": "KGW",
+  "watermark_config": {
+    "gamma": 0.25,
+    "delta": 2.0,
+    "seeding_scheme": "simple_1"
+  }
+}
+```
+
+## 🛡️ Attack Methods
+
+The framework includes **12 attack methods** to test watermark robustness:
+
+### Pre-text Attacks
+- **[Emoji attack](https://x.com/goodside/status/1610682909647671306)**: Emoji injection
+- **[Distill](https://arxiv.org/pdf/2312.04469)**: Knowledge distillation attack
+
+### Post-text Attacks
+- **[Contraction](https://arxiv.org/abs/2211.09110)**: Text contraction
+- **[Expansion](https://arxiv.org/abs/2211.09110)**: Text expansion
+- **[Lowercase](https://arxiv.org/abs/2211.09110)**: Case modification
+- **[Misspelling](https://arxiv.org/abs/2211.09110)**: Intentional misspellings
+- **[Typo](https://arxiv.org/abs/2211.09110)**: Typographical errors
+- **[Modify](https://arxiv.org/abs/2312.00273)**: Text modification
+- **[Synonym](https://arxiv.org/abs/2312.00273)**: Synonym replacement
+- **[Paraphrase](https://arxiv.org/abs/2303.13408)**: Paraphrasing attack
+- **[Translation](https://github.com/argosopentech/argos-translate)**: Back-translation
+- **[Token attack](https://arxiv.org/abs/2307.15593)**: Token-level manipulation
+
+### Usage Examples
 
 ```bash
-1. python quality.py your_config_path
-2. python quality_calcu.py your_config_path
+# Single attack
+python marktext/attacks/attack.py your_config_path
+
+# Multi-attack
+python marktext/attacks/attack_multi.py your_config_path
+
+# Emoji attack
+python marktext/attacks/attack_emoji.py your_config_path
 ```
 
+## 📈 Evaluation & Quality Assessment
+
+### Quality Evaluation
+
+```bash
+# Evaluate text quality
+python marktext/core/quality.py your_config_path
+
+# Calculate quality metrics
+python marktext/evaluation/tools/quality_calcu.py your_config_path
+```
+
+### Performance Benchmarking
+
+```bash
+# Benchmark efficiency
+python marktext/core/efficiency.py your_config_path
+```
+
+### Detection Evaluation
+
+```bash
+# Detect watermarks
+python marktext/core/detect.py your_config_path
+```
+
+## 🔬 Research & Citation
+
+This framework supports research in text watermarking. If you use MarkText in your research, please cite:
+
+```bibtex
+@article{liu2024evaluating,
+  title={On Evaluating The Performance of Watermarked Machine-Generated Texts Under Adversarial Attacks},
+  author={Liu, Zesen and Cong, Tianshuo and He, Xinlei and Li, Qi},
+  journal={arXiv preprint arXiv:2407.04794},
+  year={2024}
+}
+```
